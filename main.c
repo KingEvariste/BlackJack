@@ -10,6 +10,7 @@ static float rebet = 0;
 Exit Error Codes:
 1 - pSize exceeds maximum value of 30. int array pCards can only hold 30 values.
 2 - dSize exceeds maximum value of 30. int array dCards can only hold 30 values.
+3 - scanning float while depositing error. Usually happens when user inputs a character instead of digits.
 */
 
 
@@ -24,6 +25,7 @@ void gameUpdate(int *pCards, int*dCards, int pSize, int dSize){
 	int pTot = 0;
 	int pAce = 0;
 	system("CLS");
+	printf("Current Balance = %.2f\n\n",balance);
 	printf("Dealer Shows: ");
 	Sleep(50);
 	for(int i = 0; i < dSize; i++){
@@ -38,7 +40,7 @@ void gameUpdate(int *pCards, int*dCards, int pSize, int dSize){
 	}
 	if(dTot > 21 && dAce > 0){
 		dTot -= 10;
-		dAce --;
+		dAce = 0;
 	}
 	printf("(%d)",dTot);
 	printf("\n");
@@ -54,7 +56,7 @@ void gameUpdate(int *pCards, int*dCards, int pSize, int dSize){
 			pTot += pCards[i];
 		}
 		if(pTot > 21 && pAce > 0){
-			pAce--;
+			pAce = 0;
 			pTot-=10;
 		}
 	}
@@ -65,11 +67,16 @@ void gameUpdate(int *pCards, int*dCards, int pSize, int dSize){
 }
 
 float deposit(float x){
+	float y;
+	int ctr = 0;
 	do{
+		ctr++;
 		system("CLS");
-		float y;
 		printf("Deposit Amount: ");
 		scanf("%f",&y);
+		if(ctr > 2500){
+			exit(3);
+		}
 		if(y > 0)
 			return y;
 		printf("Invalid Amount.\nPlease Try Again.\n");
@@ -136,6 +143,7 @@ float placebet(float balance){
 
 int play(float bet){
 	system("CLS");
+	printf("Current Balance = %.2f\n\n",balance);
 	int pCards[30];
 	int dCards[30];
 	do{
@@ -241,7 +249,7 @@ int play(float bet){
 						dTot += dCards[i];
 					}
 					if(dTot > 21 && dAce > 0){
-						dAce--;
+						dAce = 0;
 						dTot-=10;
 					}else if(dTot > 21 && dAce == 0){
 						gameUpdate(pCards, dCards, pSize, dSize);
@@ -267,7 +275,7 @@ int play(float bet){
 									return 5;
 								return 0;
 							}else{
-								tempAce--;
+								tempAce = 0;
 								tempTot-=10;
 							}
 						}
@@ -317,7 +325,7 @@ int play(float bet){
 					pTot += pCards[i];
 				}
 				if(pTot > 21 && pAce > 0){
-					pAce--;
+					pAce = 0;
 					pTot-=10;
 				}else if(pTot > 21 && pAce == 0){
 					gameUpdate(pCards, dCards, pSize, dSize);
@@ -371,6 +379,9 @@ int main(){
 	printf("-------------------------------\n");
 	getch();
 	balance = deposit(balance);
+	if(balance < 0.1 && balance > -0.1){
+		exit(3);
+	}
 	do{
 		system("CLS");
 		printf("Balance: %.2f\n",balance);
@@ -380,6 +391,9 @@ int main(){
 		printf("You ran out of money. Click any key to deposit more!");
 		getch();
 		balance = deposit(balance);
+			if(balance < 0.1 && balance > -0.1){
+				exit(3);
+			}
 		}
 	}while(1);
 	return 0;
