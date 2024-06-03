@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <conio.h>
 static float balance = 0;
-
+static float rebet = 0;
 
 /*
 Exit Error Codes:
@@ -25,7 +25,7 @@ void gameUpdate(int *pCards, int*dCards, int pSize, int dSize){
 	int pAce = 0;
 	system("CLS");
 	printf("Dealer Shows: ");
-	Sleep(100);
+	Sleep(50);
 	for(int i = 0; i < dSize; i++){
 		if(dCards[i] == 1){
 			printf("A ");
@@ -61,6 +61,7 @@ void gameUpdate(int *pCards, int*dCards, int pSize, int dSize){
 	
 	printf("(%d)",pTot);
 	printf("\n");
+	Sleep(50);
 }
 
 float deposit(float x){
@@ -77,9 +78,15 @@ float deposit(float x){
 
 float placebet(float balance){
 	float bet;
-	printf("Enter Bet Amount: ");
+	printf("(Enter 1 For Rebet)\n(Enter 2 For All-In)\nEnter Bet Amount: ");
 	do{
 		scanf("%f",&bet);
+		if(bet == 1){
+			bet = rebet;
+		}
+		if(bet == 2){
+			bet = balance;
+		}
 		if(bet > 0 && bet <= balance)
 			break;
 		else if(bet > balance){
@@ -89,6 +96,7 @@ float placebet(float balance){
 		printf("Bet must be larger than 0.\nPlease enter valid bet amount: ");
 	}while(1);
 	float bj = 1.5 * bet;
+	rebet = bet;
 	//Return 0-Lose 1-Win 2-Push 3-Blackjack 4-Double Win 5- Double Lose//
 	switch(play(bet)){
 		case 0:
@@ -191,24 +199,28 @@ int play(float bet){
 	int fMove = 0;
 	int dSize = 1;
 	int pSize = 2;
+	int Doubled = 0;
 	//action: 0-stand 1-hit 2-double 3-split//
 	do{
 		if((pCards[0] == pCards[1])&&(fMove == 0)){
 			printf("Stand[0] Hit[1] Double[2] Split[3]\n");
-		}else{
+		}else if(fMove == 0){
 			printf("Stand[0] Hit[1] Double[2]\n");
+		}else{
+			printf("Stand[0] Hit[1]");
 		}
 		printf("Enter action: ");
-		action = (getch() - 48);
+		if(Doubled != 1)
+			action = (getch() - 48);
 		if((action == 3 && pCards[0] != pCards[1])||(action < 0 || action > 3)){
 			system("CLS");
 			gameUpdate(pCards, dCards, pSize, dSize);
 			printf("Invalid Action TRY AGAIN\n");
 			continue;
-		}
-		fMove = 1;
-		if(action == 0){
+		}		
+		if(action == 0 || Doubled == 1){
 			int dTot = 0;
+			fMove = 1;
 			do{
 				dTot = 0;
 				do{
@@ -234,6 +246,8 @@ int play(float bet){
 					}else if(dTot > 21 && dAce == 0){
 						gameUpdate(pCards, dCards, pSize, dSize);
 						printf("\nDealer Bust\n");
+						if(Doubled == 1)
+							return 4;
 						return 1;
 					}else if(dTot >= 17){
 						int tempTot = 0;
@@ -248,6 +262,9 @@ int play(float bet){
 						}
 						while(tempTot > 21){
 							if(tempAce == 0){
+								printf("\nPlayer Busts\n");
+								if (Doubled == 1)
+									return 5;
 								return 0;
 							}else{
 								tempAce--;
@@ -256,19 +273,31 @@ int play(float bet){
 						}
 						gameUpdate(pCards, dCards, pSize, dSize);
 						if(tempTot == dTot){
+							if((dCards[0] == 1 && dCards[1] == 10)||(dCards[0] == 10 && dCards[1] == 1)){
+								printf("Dealer BlackJack");
+								if(Doubled == 1)
+									return 5;
+								else
+									return 0;
+							}
 							printf("\nPUSH\n");
 							return 2;
 						}else if(tempTot > dTot){
 							printf("\nPlayer Wins \n");
+							if(Doubled == 1)
+								return 4;
 							return 1;
 						}else{
 							printf("\nDealer Wins \n");
+							if(Doubled == 1)
+								return 5;
 							return 0;
 						}
 					}
 				}	
 			}while(dTot < 17);
 		}else if(action == 1){
+			fMove = 1;
 			do{
 				pCards[pSize] = rand() % 13;
 			}while(pCards[pSize] == 0);
@@ -296,8 +325,40 @@ int play(float bet){
 					return 0;
 				}
 			}
+		}else if(action == 2 && fMove == 0){
+			if(balance < bet * 2){
+				printf("Not enough balance to double down.\n");
+				continue;
+			}
+			fMove = 1;
+			Doubled = 1;
+			do{
+				pCards[pSize] = rand() % 13;
+			}while(pCards[pSize] == 0);
+			if(pCards[pSize] > 10)
+				pCards[pSize] = 10;
+			pSize++;
+			gameUpdate(pCards, dCards, pSize, dSize);
+			int tempValP = 0;
+			int tempValPa = 0;
+			for(int i = 0; i < pSize; i++){
+				if(pCards[i] == 1){
+					tempValP += 11;
+					tempValPa++;
+				}else{
+					tempValP += pCards[i];
+				}
+			}
+			if(tempValP > 21 && tempValPa > 0){
+				tempValP -= 10;
+				tempValPa--;
+			}
+			if(tempValP > 21){
+				printf("\nPlayer Bust\nEnter any character to continue: \n");
+				return 5;
+			}
 		}
-	}while(action != 0 && action != 2);
+	}while(1);
 }
 
 int main(){
