@@ -11,7 +11,7 @@ Exit Error Codes:
 1 - pSize exceeds maximum value of 30. int array pCards can only hold 30 values.
 2 - dSize exceeds maximum value of 30. int array dCards can only hold 30 values.
 3 - scanning float when depositing error. Usually happens when user inputs a character.
-10- scanning float when placing bet error. Usually happens when user inputs a character.
+4 - scanning float when placing bet error. Usually happens when user inputs a character.
 */
 
 
@@ -153,7 +153,7 @@ float placebet(float balance){
 	do{
 		scanf("%f",&bet);
 		if(bet < 0.1 && bet > -0.1)
-			exit(10);
+			exit(4);
 		if(bet == 1){
 			bet = rebet;
 		}
