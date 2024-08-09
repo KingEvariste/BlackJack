@@ -490,7 +490,6 @@ int play(float bet){
 int main(){
 	srand(time(NULL));
 	printf("-------------------------------\n");
-	printf("-------------------------------\n");
 	printf("---------------@---------------\n");
 	printf("--------------@@@--------------\n");
 	printf("-------------@@@@@-------------\n");
@@ -527,7 +526,7 @@ int main(){
 			balance = placebet(balance);
 		}
 		system("CLS");
-		printf("You ran out of money.\nClick any key to deposit more!");
+		printf("You ran out of money.\nPress Enter to Deposit more!");
 		getch();
 	}while(1);
 	return 0;	
